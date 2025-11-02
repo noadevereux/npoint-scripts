@@ -3,7 +3,7 @@ set -e
 
 INSTALL_DIR="/opt"
 if [ -z "$APP_NAME" ]; then
-    APP_NAME="Nexpoint"
+    APP_NAME="nexpoint"
 fi
 APP_DIR="$INSTALL_DIR/$APP_NAME"
 APP_NAME_LOWER="${APP_NAME,,}"
@@ -125,7 +125,7 @@ detect_compose() {
 
 install_Nexpoint_script() {
     FETCH_REPO="noadevereux/npoint-scripts"
-    SCRIPT_URL="https://github.com/$FETCH_REPO/raw/master/nexpoint.sh"
+    SCRIPT_URL="https://github.com/$FETCH_REPO/raw/main/nexpoint.sh"
     colorized_echo blue "Installing Nexpoint script"
     curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/Nexpoint
     colorized_echo green "Nexpoint script installed successfully"
@@ -711,7 +711,7 @@ install_Nexpoint() {
     local Nexpoint_version=$1
     local database_type=$2
     # Fetch releases
-    FILES_URL_PREFIX="https://raw.githubusercontent.com/noadevereux/npoint-vpn/master"
+    FILES_URL_PREFIX="https://raw.githubusercontent.com/noadevereux/npoint-vpn/main"
     
     mkdir -p "$DATA_DIR"
     mkdir -p "$APP_DIR"
@@ -1475,9 +1475,9 @@ update_command() {
 
 update_Nexpoint_script() {
     FETCH_REPO="noadevereux/npoint-scripts"
-    SCRIPT_URL="https://github.com/$FETCH_REPO/raw/master/nexpoint.sh"
+    SCRIPT_URL="https://github.com/$FETCH_REPO/raw/main/nexpoint.sh"
     colorized_echo blue "Updating Nexpoint script"
-    curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/Nexpoint
+    curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/nexpoint
     colorized_echo green "Nexpoint script updated successfully"
 }
 

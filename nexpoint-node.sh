@@ -35,7 +35,7 @@ if [ -z "$NODE_IP" ]; then
 fi
 
 if [[ "$COMMAND" == "install" || "$COMMAND" == "install-script" ]] && [ -z "$APP_NAME" ]; then
-    APP_NAME="Nexpoint-node"
+    APP_NAME="nexpoint-node"
 fi
 # Set script name if APP_NAME is not set
 if [ -z "$APP_NAME" ]; then
@@ -47,8 +47,8 @@ INSTALL_DIR="/opt"
 
 if [ -d "$INSTALL_DIR/$APP_NAME" ]; then
     APP_DIR="$INSTALL_DIR/$APP_NAME"
-elif [ -d "$INSTALL_DIR/Nexpoint-node" ]; then
-    APP_DIR="$INSTALL_DIR/Nexpoint-node"
+elif [ -d "$INSTALL_DIR/nexpoint-node" ]; then
+    APP_DIR="$INSTALL_DIR/nexpoint-node"
 else
     APP_DIR="$INSTALL_DIR/$APP_NAME"
 fi
@@ -59,7 +59,7 @@ COMPOSE_FILE="$APP_DIR/docker-compose.yml"
 LAST_XRAY_CORES=5
 CERT_FILE="$DATA_DIR/cert.pem"
 FETCH_REPO="noadevereux/npoint-scripts"
-SCRIPT_URL="https://github.com/$FETCH_REPO/raw/master/nexpoint-node.sh"
+SCRIPT_URL="https://github.com/$FETCH_REPO/raw/main/nexpoint-node.sh"
 
 colorized_echo() {
     local color=$1
@@ -190,7 +190,7 @@ install_Nexpoint_node_script() {
     sed -i "s/^APP_NAME=.*/APP_NAME=\"$APP_NAME\"/" $TARGET_PATH
     
     chmod 755 $TARGET_PATH
-    colorized_echo green "Nexpoint-node script installed successfully at $TARGET_PATH"
+    colorized_echo green "nexpoint-node script installed successfully at $TARGET_PATH"
 }
 
 # Get a list of occupied ports
@@ -301,7 +301,7 @@ install_Nexpoint_node() {
     # Write content to the file
     cat > "$COMPOSE_FILE" <<EOL
 services:
-    Nexpoint-node:
+    nexpoint-node:
         container_name: $APP_NAME
         image: noadevereux/npoint-node:latest
     restart: always
@@ -331,7 +331,7 @@ EOL
 
 uninstall_Nexpoint_node_script() {
     if [ -f "/usr/local/bin/$APP_NAME" ]; then
-        colorized_echo yellow "Removing Nexpoint-node script"
+        colorized_echo yellow "Removing nexpoint-node script"
         rm "/usr/local/bin/$APP_NAME"
     fi
 }
@@ -347,7 +347,7 @@ uninstall_Nexpoint_node_docker_images() {
     images=$(docker images | grep npoint-node | awk '{print $3}')
     
     if [ -n "$images" ]; then
-        colorized_echo yellow "Removing Docker images of Nexpoint-node"
+        colorized_echo yellow "Removing Docker images of nexpoint-node"
         for image in $images; do
             if docker rmi "$image" >/dev/null 2>&1; then
                 colorized_echo yellow "Image $image removed"
@@ -380,9 +380,9 @@ follow_Nexpoint_node_logs() {
 }
 
 update_Nexpoint_node_script() {
-    colorized_echo blue "Updating Nexpoint-node script"
+    colorized_echo blue "Updating nexpoint-node script"
     curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/$APP_NAME
-    colorized_echo green "Nexpoint-node script updated successfully"
+    colorized_echo green "nexpoint-node script updated successfully"
 }
 
 update_Nexpoint_node() {
@@ -409,7 +409,7 @@ install_command() {
     check_running_as_root
     # Check if Nexpoint is already installed
     if is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node is already installed at $APP_DIR"
+        colorized_echo red "nexpoint-node is already installed at $APP_DIR"
         read -p "Do you want to override the previous installation? (y/n) "
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             colorized_echo red "Aborted installation"
@@ -438,11 +438,11 @@ uninstall_command() {
     check_running_as_root
     # Check if Nexpoint is installed
     if ! is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node not installed!"
+        colorized_echo red "nexpoint-node not installed!"
         exit 1
     fi
     
-    read -p "Do you really want to uninstall Nexpoint-node? (y/n) "
+    read -p "Do you really want to uninstall nexpoint-node? (y/n) "
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         colorized_echo red "Aborted"
         exit 1
@@ -456,18 +456,18 @@ uninstall_command() {
     uninstall_Nexpoint_node
     uninstall_Nexpoint_node_docker_images
     
-    read -p "Do you want to remove Nexpoint-node data files too ($DATA_DIR)? (y/n) "
+    read -p "Do you want to remove nexpoint-node data files too ($DATA_DIR)? (y/n) "
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        colorized_echo green "Nexpoint-node uninstalled successfully"
+        colorized_echo green "nexpoint-node uninstalled successfully"
     else
         uninstall_Nexpoint_node_data_files
-        colorized_echo green "Nexpoint-node uninstalled successfully"
+        colorized_echo green "nexpoint-node uninstalled successfully"
     fi
 }
 
 up_command() {
     help() {
-        colorized_echo red "Usage: Nexpoint-node up [options]"
+        colorized_echo red "Usage: nexpoint-node up [options]"
         echo ""
         echo "OPTIONS:"
         echo "  -h, --help        display this help message"
@@ -493,16 +493,16 @@ up_command() {
         shift
     done
     
-    # Check if Nexpoint-node is installed
+    # Check if nexpoint-node is installed
     if ! is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node's not installed!"
+        colorized_echo red "nexpoint-node's not installed!"
         exit 1
     fi
     
     detect_compose
     
     if is_Nexpoint_node_up; then
-        colorized_echo red "Nexpoint-node's already up"
+        colorized_echo red "nexpoint-node's already up"
         exit 1
     fi
     
@@ -513,16 +513,16 @@ up_command() {
 }
 
 down_command() {
-    # Check if Nexpoint-node is installed
+    # Check if nexpoint-node is installed
     if ! is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node not installed!"
+        colorized_echo red "nexpoint-node not installed!"
         exit 1
     fi
     
     detect_compose
     
     if ! is_Nexpoint_node_up; then
-        colorized_echo red "Nexpoint-node already down"
+        colorized_echo red "nexpoint-node already down"
         exit 1
     fi
     
@@ -531,7 +531,7 @@ down_command() {
 
 restart_command() {
     help() {
-        colorized_echo red "Usage: Nexpoint-node restart [options]"
+        colorized_echo red "Usage: nexpoint-node restart [options]"
         echo
         echo "OPTIONS:"
         echo "  -h, --help        display this help message"
@@ -557,9 +557,9 @@ restart_command() {
         shift
     done
     
-    # Check if Nexpoint-node is installed
+    # Check if nexpoint-node is installed
     if ! is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node not installed!"
+        colorized_echo red "nexpoint-node not installed!"
         exit 1
     fi
     
@@ -571,7 +571,7 @@ restart_command() {
 }
 
 status_command() {
-    # Check if Nexpoint-node is installed
+    # Check if nexpoint-node is installed
     if ! is_Nexpoint_node_installed; then
         echo -n "Status: "
         colorized_echo red "Not Installed"
@@ -607,7 +607,7 @@ status_command() {
 
 logs_command() {
     help() {
-        colorized_echo red "Usage: Nexpoint-node logs [options]"
+        colorized_echo red "Usage: nexpoint-node logs [options]"
         echo ""
         echo "OPTIONS:"
         echo "  -h, --help        display this help message"
@@ -635,14 +635,14 @@ logs_command() {
     
     # Check if Nexpoint is installed
     if ! is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node's not installed!"
+        colorized_echo red "nexpoint-node's not installed!"
         exit 1
     fi
     
     detect_compose
     
     if ! is_Nexpoint_node_up; then
-        colorized_echo red "Nexpoint-node is not up."
+        colorized_echo red "nexpoint-node is not up."
         exit 1
     fi
     
@@ -657,7 +657,7 @@ update_command() {
     check_running_as_root
     # Check if Nexpoint is installed
     if ! is_Nexpoint_node_installed; then
-        colorized_echo red "Nexpoint-node not installed!"
+        colorized_echo red "nexpoint-node not installed!"
         exit 1
     fi
     
@@ -667,11 +667,11 @@ update_command() {
     colorized_echo blue "Pulling latest version"
     update_Nexpoint_node
     
-    colorized_echo blue "Restarting Nexpoint-node services"
+    colorized_echo blue "Restarting nexpoint-node services"
     down_Nexpoint_node
     up_Nexpoint_node
     
-    colorized_echo blue "Nexpoint-node updated successfully"
+    colorized_echo blue "nexpoint-node updated successfully"
 }
 
 identify_the_operating_system_and_architecture() {
@@ -951,15 +951,15 @@ update_core_command() {
     fi
 
     if ! grep -q 'XRAY_EXECUTABLE_PATH: "/var/lib/nexpoint-node/xray-core/xray"' "$COMPOSE_FILE"; then
-        yq eval '.services."Nexpoint-node".environment.XRAY_EXECUTABLE_PATH = "/var/lib/nexpoint-node/xray-core/xray"' -i "$COMPOSE_FILE"
+        yq eval '.services."nexpoint-node".environment.XRAY_EXECUTABLE_PATH = "/var/lib/nexpoint-node/xray-core/xray"' -i "$COMPOSE_FILE"
     fi
 
-    if ! yq eval ".services.\"Nexpoint-node\".volumes[] | select(. == \"${DATA_MAIN_DIR}:/var/lib/nexpoint-node\")" "$COMPOSE_FILE" &>/dev/null; then
-        yq eval ".services.\"Nexpoint-node\".volumes += \"${DATA_MAIN_DIR}:/var/lib/nexpoint-node\"" -i "$COMPOSE_FILE"
+    if ! yq eval ".services.\"nexpoint-node\".volumes[] | select(. == \"${DATA_MAIN_DIR}:/var/lib/nexpoint-node\")" "$COMPOSE_FILE" &>/dev/null; then
+        yq eval ".services.\"nexpoint-node\".volumes += \"${DATA_MAIN_DIR}:/var/lib/nexpoint-node\"" -i "$COMPOSE_FILE"
     fi
     
-    # Restart Nexpoint-node
-    colorized_echo red "Restarting Nexpoint-node..."
+    # Restart nexpoint-node
+    colorized_echo red "Restarting nexpoint-node..."
     $APP_NAME restart -n
     colorized_echo blue "Installation of XRAY-CORE version $selected_version completed."
 }
@@ -1006,11 +1006,11 @@ usage() {
     colorized_echo yellow "  restart         $(tput sgr0)â€“ Restart services"
     colorized_echo yellow "  status          $(tput sgr0)â€“ Show status"
     colorized_echo yellow "  logs            $(tput sgr0)â€“ Show logs"
-    colorized_echo yellow "  install         $(tput sgr0)â€“ Install/reinstall Nexpoint-node"
+    colorized_echo yellow "  install         $(tput sgr0)â€“ Install/reinstall nexpoint-node"
     colorized_echo yellow "  update          $(tput sgr0)â€“ Update to latest version"
-    colorized_echo yellow "  uninstall       $(tput sgr0)â€“ Uninstall Nexpoint-node"
-    colorized_echo yellow "  install-script  $(tput sgr0)â€“ Install Nexpoint-node script"
-    colorized_echo yellow "  uninstall-script  $(tput sgr0)â€“ Uninstall Nexpoint-node script"
+    colorized_echo yellow "  uninstall       $(tput sgr0)â€“ Uninstall nexpoint-node"
+    colorized_echo yellow "  install-script  $(tput sgr0)â€“ Install nexpoint-node script"
+    colorized_echo yellow "  uninstall-script  $(tput sgr0)â€“ Uninstall nexpoint-node script"
     colorized_echo yellow "  edit            $(tput sgr0)â€“ Edit docker-compose.yml (via nano or vi)"
     colorized_echo yellow "  core-update     $(tput sgr0)â€“ Update/Change Xray core"
     
