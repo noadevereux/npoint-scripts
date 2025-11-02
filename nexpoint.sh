@@ -431,7 +431,7 @@ backup_service() {
 
     colorized_echo green "Backup service configuration saved in $ENV_FILE."
 
-    local backup_command="$(which bash) -c '$APP_NAME backup'"
+    local backup_command="$APP_NAME backup"
     add_cron_job "$cron_schedule" "$backup_command"
 
     colorized_echo green "Backup service successfully configured."
