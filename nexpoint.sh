@@ -126,9 +126,9 @@ detect_compose() {
 install_Nexpoint_script() {
     FETCH_REPO="noadevereux/npoint-scripts"
     SCRIPT_URL="https://github.com/$FETCH_REPO/raw/main/nexpoint.sh"
-    colorized_echo blue "Installing Nexpoint script"
-    curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/Nexpoint
-    colorized_echo green "Nexpoint script installed successfully"
+    colorized_echo blue "Installing nexpoint script"
+    curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/nexpoint
+    colorized_echo green "nexpoint script installed successfully"
 }
 
 is_Nexpoint_installed() {
@@ -451,7 +451,7 @@ add_cron_job() {
 
     crontab -l 2>/dev/null > "$temp_cron" || true
     grep -v "$command" "$temp_cron" > "${temp_cron}.tmp" && mv "${temp_cron}.tmp" "$temp_cron"
-    echo "$schedule $command # Nexpoint-backup-service" >> "$temp_cron"
+    echo "$schedule $command # nexpoint-backup-service" >> "$temp_cron"
     
     if crontab "$temp_cron"; then
         colorized_echo green "Cron job successfully added."
@@ -474,7 +474,7 @@ remove_backup_service() {
     local temp_cron=$(mktemp)
     crontab -l 2>/dev/null > "$temp_cron"
 
-    sed -i '/# Nexpoint-backup-service/d' "$temp_cron"
+    sed -i '/# nexpoint-backup-service/d' "$temp_cron"
 
     if crontab "$temp_cron"; then
         colorized_echo green "Backup service task removed from crontab."
@@ -554,7 +554,7 @@ backup_command() {
                 fi
                 ;;
             mysql)
-                if ! docker exec "$container_name" mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" Nexpoint --events --triggers  > "$temp_dir/db_backup.sql" 2>>"$log_file"; then
+                if ! docker exec "$container_name" mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" nexpoint --events --triggers  > "$temp_dir/db_backup.sql" 2>>"$log_file"; then
                     error_messages+=("MySQL dump failed.")
                 fi
                 ;;
@@ -680,14 +680,14 @@ get_xray_core() {
     rm "${xray_filename}"
 }
 
-# Function to update the Nexpoint Main core
+# Function to update the nexpoint Main core
 update_core_command() {
     check_running_as_root
     get_xray_core
-    # Change the Nexpoint core
+    # Change the nexpoint core
     xray_executable_path="XRAY_EXECUTABLE_PATH=\"/var/lib/nexpoint/xray-core/xray\""
     
-    echo "Changing the Nexpoint core..."
+    echo "Changing the nexpoint core..."
     # Check if the XRAY_EXECUTABLE_PATH string already exists in the .env file
     if ! grep -q "^XRAY_EXECUTABLE_PATH=" "$ENV_FILE"; then
         # If the string does not exist, add it
@@ -697,12 +697,12 @@ update_core_command() {
         sed -i "s~^XRAY_EXECUTABLE_PATH=.*~${xray_executable_path}~" "$ENV_FILE"
     fi
     
-    # Restart Nexpoint
-    colorized_echo red "Restarting Nexpoint..."
+    # Restart nexpoint
+    colorized_echo red "Restarting nexpoint..."
     if restart_command -n >/dev/null 2>&1; then
-        colorized_echo green "Nexpoint successfully restarted!"
+        colorized_echo green "nexpoint successfully restarted!"
     else
-        colorized_echo red "Nexpoint restart failed!"
+        colorized_echo red "nexpoint restart failed!"
     fi
     colorized_echo blue "Installation of Xray-core version $selected_version completed."
 }
@@ -723,7 +723,7 @@ install_Nexpoint() {
                 # Generate docker-compose.yml with MariaDB content
                                     cat > "$docker_file_path" <<EOF
     services:
-        Nexpoint:
+        nexpoint:
             image: inlovewithxanny/npoint-vpn:${Nexpoint_version}
             restart: always
             env_file: .env
@@ -786,7 +786,7 @@ EOF
 
 
         # Add the MySQL connection string
-        #echo -e '\nSQLALCHEMY_DATABASE_URL = "mysql+pymysql://Nexpoint:password@127.0.0.1:3306/Nexpoint"' >> "$APP_DIR/.env"
+        #echo -e '\nSQLALCHEMY_DATABASE_URL = "mysql+pymysql://nexpoint:password@127.0.0.1:3306/nexpoint"' >> "$APP_DIR/.env"
 
         sed -i 's/^# \(XRAY_JSON = .*\)$/\1/' "$APP_DIR/.env"
     sed -i 's~\(XRAY_JSON = \).*~\1"/var/lib/nexpoint/xray_config.json"~' "$APP_DIR/.env"
@@ -799,11 +799,11 @@ EOF
         echo "" >> "$ENV_FILE"
         echo "# Database configuration" >> "$ENV_FILE"
         echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" >> "$ENV_FILE"
-        echo "MYSQL_DATABASE=Nexpoint" >> "$ENV_FILE"
-        echo "MYSQL_USER=Nexpoint" >> "$ENV_FILE"
+        echo "MYSQL_DATABASE=nexpoint" >> "$ENV_FILE"
+        echo "MYSQL_USER=nexpoint" >> "$ENV_FILE"
         echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "$ENV_FILE"
         
-        SQLALCHEMY_DATABASE_URL="mysql+pymysql://Nexpoint:${MYSQL_PASSWORD}@127.0.0.1:3306/Nexpoint"
+        SQLALCHEMY_DATABASE_URL="mysql+pymysql://nexpoint:${MYSQL_PASSWORD}@127.0.0.1:3306/nexpoint"
         
         echo "" >> "$ENV_FILE"
         echo "# SQLAlchemy Database URL" >> "$ENV_FILE"
@@ -815,7 +815,7 @@ EOF
                 # Generate docker-compose.yml with MySQL content
                 cat > "$docker_file_path" <<EOF
 services:
-    Nexpoint:
+    nexpoint:
         image: inlovewithxanny/npoint-vpn:${Nexpoint_version}
         restart: always
         env_file: .env
@@ -857,7 +857,7 @@ services:
         volumes:
             - /var/lib/nexpoint/mysql:/var/lib/mysql
         healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "Nexpoint", "--password=\\${MYSQL_PASSWORD}"]
+            test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "nexpoint", "--password=\\${MYSQL_PASSWORD}"]
             start_period: 5s
             interval: 5s
             timeout: 5s
@@ -878,7 +878,7 @@ EOF
 
 
         # Add the MySQL connection string
-        #echo -e '\nSQLALCHEMY_DATABASE_URL = "mysql+pymysql://Nexpoint:password@127.0.0.1:3306/Nexpoint"' >> "$APP_DIR/.env"
+        #echo -e '\nSQLALCHEMY_DATABASE_URL = "mysql+pymysql://nexpoint:password@127.0.0.1:3306/nexpoint"' >> "$APP_DIR/.env"
 
         sed -i 's/^# \(XRAY_JSON = .*\)$/\1/' "$APP_DIR/.env"
         sed -i 's~\(XRAY_JSON = \).*~\1"/var/lib/nexpoint/xray_config.json"~' "$APP_DIR/.env"
@@ -891,11 +891,11 @@ EOF
         echo "" >> "$ENV_FILE"
         echo "# Database configuration" >> "$ENV_FILE"
         echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" >> "$ENV_FILE"
-        echo "MYSQL_DATABASE=Nexpoint" >> "$ENV_FILE"
-        echo "MYSQL_USER=Nexpoint" >> "$ENV_FILE"
+        echo "MYSQL_DATABASE=nexpoint" >> "$ENV_FILE"
+        echo "MYSQL_USER=nexpoint" >> "$ENV_FILE"
         echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "$ENV_FILE"
         
-        SQLALCHEMY_DATABASE_URL="mysql+pymysql://Nexpoint:${MYSQL_PASSWORD}@127.0.0.1:3306/Nexpoint"
+        SQLALCHEMY_DATABASE_URL="mysql+pymysql://nexpoint:${MYSQL_PASSWORD}@127.0.0.1:3306/nexpoint"
         
         echo "" >> "$ENV_FILE"
         echo "# SQLAlchemy Database URL" >> "$ENV_FILE"
@@ -912,9 +912,9 @@ EOF
 
         # Install requested version
         if [ "$Nexpoint_version" == "latest" ]; then
-            yq -i '.services.Nexpoint.image = "inlovewithxanny/npoint-vpn:latest"' "$docker_file_path"
+            yq -i '.services.nexpoint.image = "inlovewithxanny/npoint-vpn:latest"' "$docker_file_path"
         else
-            yq -i ".services.Nexpoint.image = \"inlovewithxanny/npoint-vpn:${Nexpoint_version}\"" "$docker_file_path"
+            yq -i ".services.nexpoint.image = \"inlovewithxanny/npoint-vpn:${Nexpoint_version}\"" "$docker_file_path"
         fi
         echo "Installing $Nexpoint_version version"
         colorized_echo green "File saved in $APP_DIR/docker-compose.yml"
@@ -940,7 +940,7 @@ EOF
     curl -sL "$FILES_URL_PREFIX/xray_config.json" -o "$DATA_DIR/xray_config.json"
     colorized_echo green "File saved in $DATA_DIR/xray_config.json"
     
-    colorized_echo green "Nexpoint's files downloaded successfully"
+    colorized_echo green "nexpoint's files downloaded successfully"
 }
 
 up_Nexpoint() {
@@ -953,7 +953,7 @@ follow_Nexpoint_logs() {
 
 status_command() {
     
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
         echo -n "Status: "
         colorized_echo red "Not Installed"
@@ -993,7 +993,7 @@ prompt_for_Nexpoint_password() {
     colorized_echo cyan "If you do not enter a custom password, a secure 20-character password will be generated automatically."
 
     # Ð—Ð°Ð¿Ñ€Ð°ÑˆÐ¸Ð²Ð°ÐµÐ¼ Ð²Ð²Ð¾Ð´ Ð¿Ð°Ñ€Ð¾Ð»Ñ
-    read -p "Enter the password for the Nexpoint user (or press Enter to generate a secure default password): " MYSQL_PASSWORD
+    read -p "Enter the password for the nexpoint user (or press Enter to generate a secure default password): " MYSQL_PASSWORD
 
     # Ð“ÐµÐ½ÐµÑ€Ð°Ñ†Ð¸Ñ 20-Ð·Ð½Ð°Ñ‡Ð½Ð¾Ð³Ð¾ Ð¿Ð°Ñ€Ð¾Ð»Ñ, ÐµÑÐ»Ð¸ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒ Ð¾ÑÑ‚Ð°Ð²Ð¸Ð» Ð¿Ð¾Ð»Ðµ Ð¿ÑƒÑÑ‚Ñ‹Ð¼
     if [ -z "$MYSQL_PASSWORD" ]; then
@@ -1047,9 +1047,9 @@ install_command() {
         esac
     done
 
-    # Check if Nexpoint is already installed
+    # Check if nexpoint is already installed
     if is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint is already installed at $APP_DIR"
+        colorized_echo red "nexpoint is already installed at $APP_DIR"
         read -p "Do you want to override the previous installation? (y/n) "
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             colorized_echo red "Aborted installation"
@@ -1202,7 +1202,7 @@ follow_Nexpoint_logs() {
 }
 
 Nexpoint_cli() {
-    $COMPOSE -f $COMPOSE_FILE -p "$APP_NAME" exec -e CLI_PROG_NAME="Nexpoint cli" Nexpoint Nexpoint-cli "$@"
+    $COMPOSE -f $COMPOSE_FILE -p "$APP_NAME" exec -e CLI_PROG_NAME="nexpoint cli" nexpoint nexpoint-cli "$@"
 }
 
 
@@ -1216,13 +1216,13 @@ is_Nexpoint_up() {
 
 uninstall_command() {
     check_running_as_root
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
-    read -p "Do you really want to uninstall Nexpoint? (y/n) "
+    read -p "Do you really want to uninstall nexpoint? (y/n) "
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         colorized_echo red "Aborted"
         exit 1
@@ -1236,19 +1236,19 @@ uninstall_command() {
     uninstall_Nexpoint
     uninstall_Nexpoint_docker_images
     
-    read -p "Do you want to remove Nexpoint's data files too ($DATA_DIR)? (y/n) "
+    read -p "Do you want to remove nexpoint's data files too ($DATA_DIR)? (y/n) "
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        colorized_echo green "Nexpoint uninstalled successfully"
+        colorized_echo green "nexpoint uninstalled successfully"
     else
         uninstall_Nexpoint_data_files
-        colorized_echo green "Nexpoint uninstalled successfully"
+        colorized_echo green "nexpoint uninstalled successfully"
     fi
 }
 
 uninstall_Nexpoint_script() {
-    if [ -f "/usr/local/bin/Nexpoint" ]; then
-        colorized_echo yellow "Removing Nexpoint script"
-        rm "/usr/local/bin/Nexpoint"
+    if [ -f "/usr/local/bin/nexpoint" ]; then
+        colorized_echo yellow "Removing nexpoint script"
+        rm "/usr/local/bin/nexpoint"
     fi
 }
 
@@ -1260,10 +1260,10 @@ uninstall_Nexpoint() {
 }
 
 uninstall_Nexpoint_docker_images() {
-    images=$(docker images | grep Nexpoint | awk '{print $3}')
+    images=$(docker images | grep nexpoint | awk '{print $3}')
     
     if [ -n "$images" ]; then
-        colorized_echo yellow "Removing Docker images of Nexpoint"
+        colorized_echo yellow "Removing Docker images of nexpoint"
         for image in $images; do
             if docker rmi "$image" >/dev/null 2>&1; then
                 colorized_echo yellow "Image $image removed"
@@ -1281,7 +1281,7 @@ uninstall_Nexpoint_data_files() {
 
 restart_command() {
     help() {
-        colorized_echo red "Usage: Nexpoint restart [options]"
+        colorized_echo red "Usage: nexpoint restart [options]"
         echo
         echo "OPTIONS:"
         echo "  -h, --help        display this help message"
@@ -1307,9 +1307,9 @@ restart_command() {
         shift
     done
     
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
@@ -1320,11 +1320,11 @@ restart_command() {
     if [ "$no_logs" = false ]; then
         follow_Nexpoint_logs
     fi
-    colorized_echo green "Nexpoint successfully restarted!"
+    colorized_echo green "nexpoint successfully restarted!"
 }
 logs_command() {
     help() {
-        colorized_echo red "Usage: Nexpoint logs [options]"
+        colorized_echo red "Usage: nexpoint logs [options]"
         echo ""
         echo "OPTIONS:"
         echo "  -h, --help        display this help message"
@@ -1350,16 +1350,16 @@ logs_command() {
         shift
     done
     
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
     detect_compose
     
     if ! is_Nexpoint_up; then
-        colorized_echo red "Nexpoint is not up."
+        colorized_echo red "nexpoint is not up."
         exit 1
     fi
     
@@ -1372,16 +1372,16 @@ logs_command() {
 
 down_command() {
     
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
     detect_compose
     
     if ! is_Nexpoint_up; then
-        colorized_echo red "Nexpoint's already down"
+        colorized_echo red "nexpoint's already down"
         exit 1
     fi
     
@@ -1389,16 +1389,16 @@ down_command() {
 }
 
 cli_command() {
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
     detect_compose
     
     if ! is_Nexpoint_up; then
-        colorized_echo red "Nexpoint is not up."
+        colorized_echo red "nexpoint is not up."
         exit 1
     fi
     
@@ -1407,7 +1407,7 @@ cli_command() {
 
 up_command() {
     help() {
-        colorized_echo red "Usage: Nexpoint up [options]"
+        colorized_echo red "Usage: nexpoint up [options]"
         echo ""
         echo "OPTIONS:"
         echo "  -h, --help        display this help message"
@@ -1433,16 +1433,16 @@ up_command() {
         shift
     done
     
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
     detect_compose
     
     if is_Nexpoint_up; then
-        colorized_echo red "Nexpoint's already up"
+        colorized_echo red "nexpoint's already up"
         exit 1
     fi
     
@@ -1454,9 +1454,9 @@ up_command() {
 
 update_command() {
     check_running_as_root
-    # Check if Nexpoint is installed
+    # Check if nexpoint is installed
     if ! is_Nexpoint_installed; then
-        colorized_echo red "Nexpoint's not installed!"
+        colorized_echo red "nexpoint's not installed!"
         exit 1
     fi
     
@@ -1466,19 +1466,19 @@ update_command() {
     colorized_echo blue "Pulling latest version"
     update_Nexpoint
     
-    colorized_echo blue "Restarting Nexpoint's services"
+    colorized_echo blue "Restarting nexpoint's services"
     down_Nexpoint
     up_Nexpoint
     
-    colorized_echo blue "Nexpoint updated successfully"
+    colorized_echo blue "nexpoint updated successfully"
 }
 
 update_Nexpoint_script() {
     FETCH_REPO="noadevereux/npoint-scripts"
     SCRIPT_URL="https://github.com/$FETCH_REPO/raw/main/nexpoint.sh"
-    colorized_echo blue "Updating Nexpoint script"
+    colorized_echo blue "Updating nexpoint script"
     curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/nexpoint
-    colorized_echo green "Nexpoint script updated successfully"
+    colorized_echo green "nexpoint script updated successfully"
 }
 
 update_Nexpoint() {
@@ -1525,7 +1525,7 @@ edit_env_command() {
 usage() {
     local script_name="${0##*/}"
     colorized_echo blue "=============================="
-    colorized_echo magenta "           Nexpoint Help"
+    colorized_echo magenta "           nexpoint Help"
     colorized_echo blue "=============================="
     colorized_echo cyan "Usage:"
     echo "  ${script_name} [command]"
@@ -1537,13 +1537,13 @@ usage() {
     colorized_echo yellow "  restart         $(tput sgr0)â€“ Restart services"
     colorized_echo yellow "  status          $(tput sgr0)â€“ Show status"
     colorized_echo yellow "  logs            $(tput sgr0)â€“ Show logs"
-    colorized_echo yellow "  cli             $(tput sgr0)â€“ Nexpoint CLI"
-    colorized_echo yellow "  install         $(tput sgr0)â€“ Install Nexpoint"
+    colorized_echo yellow "  cli             $(tput sgr0)â€“ nexpoint CLI"
+    colorized_echo yellow "  install         $(tput sgr0)â€“ Install nexpoint"
     colorized_echo yellow "  update          $(tput sgr0)â€“ Update to latest version"
-    colorized_echo yellow "  uninstall       $(tput sgr0)â€“ Uninstall Nexpoint"
-    colorized_echo yellow "  install-script  $(tput sgr0)â€“ Install Nexpoint script"
+    colorized_echo yellow "  uninstall       $(tput sgr0)â€“ Uninstall nexpoint"
+    colorized_echo yellow "  install-script  $(tput sgr0)â€“ Install nexpoint script"
     colorized_echo yellow "  backup          $(tput sgr0)â€“ Manual backup launch"
-    colorized_echo yellow "  backup-service  $(tput sgr0)â€“ Nexpoint Backupservice to backup to TG, and a new job in crontab"
+    colorized_echo yellow "  backup-service  $(tput sgr0)â€“ nexpoint Backupservice to backup to TG, and a new job in crontab"
     colorized_echo yellow "  core-update     $(tput sgr0)â€“ Update/Change Xray core"
     colorized_echo yellow "  edit            $(tput sgr0)â€“ Edit docker-compose.yml (via nano or vi editor)"
     colorized_echo yellow "  edit-env        $(tput sgr0)â€“ Edit environment file (via nano or vi editor)"
